@@ -1,0 +1,17 @@
+name: golang-pipeline
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Unit Tests
+        run: go test -v ./src
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
