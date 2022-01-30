@@ -4,7 +4,7 @@ usage() {
   echo ROOTDIR is absolute path on your machine
  exit; }
 
-ROOTDIR=${1:-""}
+ROOTDIR=${1:-"${PWD}"}
 MOUNTPOINT=${2:-"/tree"} # This is fixed in the src code
 
 if test -e ${ROOTDIR}; then
@@ -13,12 +13,11 @@ if test -e ${ROOTDIR}; then
   fi
   docker build . \
     -t simple_server;
-  set -x
-  ls -a "${ROOTDIR}"
   docker run \
-    --name peek-app -i --rm \
-    -p 8000:8000 \
-    --mount type=bind,source="${PWD}",target=/peekfile \
+    --name peek-app -d -i \
+    --rm \
+    -p 8080:8000 \
+    --mount type=bind,source="${PWD}/src",target=/app \
     --mount type=bind,source="${ROOTDIR}",target=${MOUNTPOINT} \
     simple_server
   set +x

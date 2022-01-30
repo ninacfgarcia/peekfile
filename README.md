@@ -7,14 +7,19 @@ from top-level repo directory, pass an absolute path:
 With an http tool like curl, call the API.
 API Handles valid paths relative to the $PATH_TO_BROWSE, depending on what's on your machine's filesystem.
 
+## Stop
+
+`docker stop peek-app`
+
+docker stop will stop and also remove the container
 
 ### List directory
 
-`curl -s http://localhost:8000/<PATH>`
+`curl -s http://localhost:8080/<PATH>`
 
 ### View file contents
 
-`curl -s http://localhost:8000/<PATH.ext>`
+`curl -s http://localhost:8080/<PATH.ext>`
 
 
 

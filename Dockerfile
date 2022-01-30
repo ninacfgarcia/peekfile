@@ -1,4 +1,5 @@
 FROM golang:1.17-alpine
-WORKDIR "/peekfile"
+WORKDIR "/app"
 EXPOSE 8000
-CMD ["go", "run", "src/main.go", "src/schema.go", "/tree"]
+COPY *.go .
+CMD ["go", "run", "main.go", "schema.go", "/tree"]
