@@ -51,30 +51,31 @@ func pathDataHandler(
 	fileDataFrom func(string) ResponseData,
 ) func(string, StubFileMode) ResponseData {
 	return func(path string, info StubFileMode) ResponseData {
-		if info.IsDir() {
-			return dirDataFrom(path)
-		} else if info.IsRegular() {
-			return fileDataFrom(path)
-		} else {
-			return ResponseData{
-				http.StatusInternalServerError,
-				BadPayload{fmt.Sprintf("Not a valid path %s", path)},
+		if info != nil {
+			if info.IsDir() {
+				return dirDataFrom(path)
+			} else if info.IsRegular() {
+				return fileDataFrom(path)
 			}
+		}
+		return ResponseData{
+			http.StatusNotFound,
+			BadPayload{fmt.Sprintf("Not a valid path %s", path)},
 		}
 	}
 }
 
 func GetLStatMode(path string) (StubFileMode, error) {
 	info, err := os.Lstat(path)
-	return info.Mode(), err
+	if err != nil {
+		return nil, err
+	}
+	return info.Mode(), nil
 }
 
 func GetResponseForPath(getMode func(string) (StubFileMode, error)) func(string) ResponseData {
 	return func(path string) ResponseData {
-		mode, err := getMode(path)
-		if err != nil {
-			return ResponseData{http.StatusNotFound, BadPayload{err.Error()}}
-		}
+		mode, _ := getMode(path)
 
 		handler := pathDataHandler(dirDataFrom, fileDataFrom)
 		return handler(path, mode)
@@ -82,7 +83,7 @@ func GetResponseForPath(getMode func(string) (StubFileMode, error)) func(string)
 }
 
 func marshalResponseData(data ResponseData) ([]byte, int) {
-	body, err := json.MarshalIndent(data, "", " ")
+	body, err := json.MarshalIndent(data.Payload, "", "  ")
 	if err != nil {
 		return []byte("{\"error\":\"Could not marshal response\"}"),
 			http.StatusInternalServerError

@@ -55,7 +55,7 @@ func TestGetResponseForPathReturnsError(t *testing.T) {
 		return nil, errors.New("")
 	})
 	assert.Equal(t, http.StatusNotFound, f("bad-path").Status,
-		"When GetResponseForPath handler returns error, response status is StatusNotFound",
+		"GetResponseForPath handler should respond with StatusNotFound",
 	)
 }
 
