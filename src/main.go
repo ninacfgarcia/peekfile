@@ -64,13 +64,23 @@ func pathDataHandler(
 	}
 }
 
-func getResponseForPath(path string) ResponseData {
+func GetLStatMode(path string) (StubFileMode, error) {
 	info, err := os.Lstat(path)
-	if err != nil {
-		return ResponseData{http.StatusNotFound, BadPayload{err.Error()}}
-	}
-	return pathDataHandler(dirDataFrom, fileDataFrom)(path, info.Mode())
+	return info.Mode(), err
 }
+
+func GetResponseForPath(getMode func(string) (StubFileMode, error)) func(string) ResponseData {
+	return func(path string) ResponseData {
+		mode, err := getMode(path)
+		if err != nil {
+			return ResponseData{http.StatusNotFound, BadPayload{err.Error()}}
+		}
+
+		handler := pathDataHandler(dirDataFrom, fileDataFrom)
+		return handler(path, mode)
+	}
+}
+
 func marshalResponseData(data ResponseData) ([]byte, int) {
 	body, err := json.MarshalIndent(data, "", " ")
 	if err != nil {
@@ -84,7 +94,8 @@ func pathHandler(rw http.ResponseWriter, req *http.Request) {
 	path := filepath.Join(os.Args[1], req.URL.Path)
 	defer req.Body.Close()
 
-	data := getResponseForPath(path)
+	dataHandler := GetResponseForPath(GetLStatMode)
+	data := dataHandler(path)
 	rw.Header().Set("Content-Type", "application/json")
 	responseBody, status := marshalResponseData(data)
 	rw.WriteHeader(status)

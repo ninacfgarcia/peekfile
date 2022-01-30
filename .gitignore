@@ -1,4 +1,17 @@
-.DS_Store
-no
-*.txt
+*
+
+# But not these files...
+!/.gitignore
+!/.github
+
+!*.go
+!go.sum
+!go.mod
+!Dockerfile
+
+!README.md
+!LICENSE
+
+# ...even if they are in subdirectories
+!*/
 

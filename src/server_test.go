@@ -1,6 +1,9 @@
 package main
 
 import (
+	"errors"
+	"net/http"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -45,4 +48,17 @@ func TestPathDataHandler(t *testing.T) {
 	assert.Equal(t, 1, len(fileMock.calls))
 	assert.Equal(t, dirMock.calls[0], "dir-mock-path/")
 	assert.EqualValues(t, response, dirMock.rval)
+}
+
+func TestGetResponseForPathReturnsError(t *testing.T) {
+	f := GetResponseForPath(func(string) (StubFileMode, error) {
+		return nil, errors.New("")
+	})
+	assert.Equal(t, http.StatusNotFound, f("bad-path").Status,
+		"When GetResponseForPath handler returns error, response status is StatusNotFound",
+	)
+}
+
+func TestMain(m *testing.M) {
+	os.Exit(m.Run())
 }
