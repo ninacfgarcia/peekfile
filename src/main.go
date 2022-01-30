@@ -34,7 +34,7 @@ func dirDataFrom(path string) ResponseData {
 	payload, formatErr := FormatEntries(data)
 	if formatErr != nil {
 		return ResponseData{
-			http.StatusForbidden,
+			http.StatusInternalServerError,
 			BadPayload{formatErr.Error()},
 		}
 	}

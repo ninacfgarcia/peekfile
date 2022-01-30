@@ -16,25 +16,33 @@ func (mock *MockFunction) dataFrom(path string) ResponseData {
 	return mock.rval
 }
 
-type MockStubFileMode struct {
+type MockFileMode struct {
 	isDir     bool
 	isRegular bool
 }
 
-func (s MockStubFileMode) IsDir() bool {
+func (s MockFileMode) IsDir() bool {
 	return s.isDir
 }
-func (s MockStubFileMode) IsRegular() bool {
+func (s MockFileMode) IsRegular() bool {
 	return s.isRegular
 }
 
 func TestPathDataHandler(t *testing.T) {
-	fileMock := MockFunction{calls: make([]string, 0), rval: ResponseData{123, "fake-payload"}}
-	dirMock := MockFunction{}
-	fo := MockStubFileMode{isDir: false, isRegular: true} // file
-	response := pathDataHandler(dirMock.dataFrom, fileMock.dataFrom)("test-string", fo)
+	fileMock := MockFunction{rval: ResponseData{123, "fake-payload-file"}}
+	dirMock := MockFunction{rval: ResponseData{123, "fake-payload-dir"}}
+	handler := pathDataHandler(dirMock.dataFrom, fileMock.dataFrom)
+
+	fileFileMode := MockFileMode{isDir: false, isRegular: true}
+	response := handler("file-mock-path/", fileFileMode)
 
 	assert.Equal(t, 1, len(fileMock.calls))
-	assert.Equal(t, fileMock.calls[0], "test-string")
+	assert.Equal(t, fileMock.calls[0], "file-mock-path/")
 	assert.EqualValues(t, response, fileMock.rval)
+
+	dirFileMode := MockFileMode{isDir: true, isRegular: false}
+	response = handler("dir-mock-path/", dirFileMode)
+	assert.Equal(t, 1, len(fileMock.calls))
+	assert.Equal(t, dirMock.calls[0], "dir-mock-path/")
+	assert.EqualValues(t, response, dirMock.rval)
 }
